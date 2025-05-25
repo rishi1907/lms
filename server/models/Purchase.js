@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const purchaseSchema = new mongoose.Schema({
   userId: {
-    type: String, // fixed from ObjectId to String
+    type: String, // Clerk user ID
     required: true,
   },
   courseId: {
@@ -13,6 +13,11 @@ const purchaseSchema = new mongoose.Schema({
   amount: {
     type: Number,
     required: true,
+  },
+  status: {
+    type: String,
+    enum: ["pending", "completed", "failed"],
+    default: "pending",
   },
 }, {
   timestamps: true
