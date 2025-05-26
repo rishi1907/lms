@@ -93,16 +93,11 @@ export const stripeWebhook = async (request, response) => {
         userData.enrolledCourses.push(courseData._id)
         await userData.save();
 
-        try {
-            purchaseData.status = 'completed';
-            await purchaseData.save();
-            console.log('Saved successfully');
-          } catch (err) {
-            console.error('Save failed:', err);
-          }
-          
+        purchaseData.status = 'completed';
+        await purchaseData.save();
 
-      break;}
+      break;
+    }
 
 
     case 'payment_intent.payment_failed':{
