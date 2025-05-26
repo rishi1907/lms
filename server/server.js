@@ -12,26 +12,25 @@ import userRouter from './routes/userRoutes.js'
 //initialize express app
 const app = express()
 
-// Stripe webhook route should come FIRST before any body parser
-app.post('/stripe', express.raw({ type: 'application/json' }), stripeWebhook)
-
-// Connect to services
+//Connect to Database
 await connectDB()
 await connectCloudinary()
 
-// Middleware
+//middleware
 app.use(cors())
 app.use(clerkMiddleware())
 
-// Routes
+//Routes
 app.get('/', (req, res) => res.send('API is working'))
-app.post('/clerk', express.json(), clerkWebhook)
+app.post('/clerk', express.json() , clerkWebhook)
 app.use('/api/educator', express.json(), educatorRouter)
 app.use('/api/course', express.json(), courseRouter)
-app.use('/api/user', express.json(), userRouter)
+app.use('/api/user' , express.json(), userRouter)
+app.post('/stripe', express.raw({ type: 'application/json' }), stripeWebhook)
 
 //Port
 const PORT = process.env.PORT || 5000
+
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`)
 })
