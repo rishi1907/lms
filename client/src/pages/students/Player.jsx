@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { assets } from '../../assets/assets';
 import humanizeDuration from 'humanize-duration';
 import YouTube from 'react-youtube';
-import Footer from '../../components/students/footer';
+import Footer from '../../components/students/Footer';
 import Rating from '../../components/students/rating';
 import { toast } from 'react-toastify';
 import Loading from '../../components/students/loading';
@@ -21,16 +21,16 @@ const Player = () => {
   const [initialRating, setInitialRating] = useState(0);
 
   const getCourseData = () => {
-    const course = enrolledCourses.find((course) => course._id === courseId);
-    if (course) {
-      setCourseData(course);
-
-      // ✅ Replaced map with find
-      const userRating = course.courseRatings.find((item) => item.userId === userData._id);
-      if (userRating) {
-        setInitialRating(userRating.rating);
+    enrolledCourses.map((course) => {
+      if (course._id === courseId) {
+        setCourseData(course);
+        course.courseRatings.map((item) => {
+          if (item.userId === userData._id) {
+            setInitialRating(item.rating);
+          }
+        })
       }
-    }
+    });
   };
 
   const toggleSection = (index) => {
@@ -44,7 +44,7 @@ const Player = () => {
     if (enrolledCourses.length > 0) {
       getCourseData();
     }
-  }, [enrolledCourses, courseId]);
+  }, [enrolledCourses]);
 
   const markLectureAsCompleted = async (lectureId) => {
     try {

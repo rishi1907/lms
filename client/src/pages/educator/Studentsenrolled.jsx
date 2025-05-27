@@ -13,7 +13,7 @@ const Studentsenrolled = () => {
     try {
       const token = await getToken()
       const { data } = await axios.get(
-        `${backendUrl}/api/educator/enrolled-students`,
+        backendUrl + '/api/educator/enrolled-students',
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -25,7 +25,7 @@ const Studentsenrolled = () => {
         toast.error(data.message)
       }
     } catch (error) {
-      toast.error(error.message || "Something went wrong while fetching data.")
+      toast.error(error.message)
     }
   }
 

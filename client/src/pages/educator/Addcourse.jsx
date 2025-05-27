@@ -99,19 +99,13 @@ const Addcourse = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!image) {
-      toast.error('Thumbnail Not Selected');
-      return;
-    }
-
-    if (!quillRef.current || !quillRef.current.root) {
-      toast.error('Course Description is not initialized');
-      return;
-    }
-
     try {
+      e.preventDefault();
+
+      if (!image) {
+        toast.error('Thumbnail Not Selected');
+        return;
+      }
       const courseData = {
         courseTitle,
         courseDescription: quillRef.current.root.innerHTML,
@@ -122,7 +116,7 @@ const Addcourse = () => {
 
       const formData = new FormData();
       formData.append('courseData', JSON.stringify(courseData));
-      formData.append('Image', image);
+      formData.append('image', image);
 
       const token = await getToken();
       const { data } = await axios.post(`${backendUrl}/api/educator/add-course`, formData, {

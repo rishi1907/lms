@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { AppContext } from '../../context/Appcontext'
 import { Line } from 'rc-progress'
-import Footer from '../../components/students/footer'
+import Footer from '../../components/students/Footer'
 import { toast } from 'react-toastify'
 
 const Myenrollments = () => {

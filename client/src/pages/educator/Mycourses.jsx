@@ -5,7 +5,7 @@ import axios from 'axios'
 import { toast } from 'react-toastify'
 
 const Mycourses = () => {
-  const { currency, allCourses ,backendUrl , isEducator , getToken } = useContext(AppContext)
+  const { currency ,backendUrl , isEducator , getToken } = useContext(AppContext)
 
   const [courses, setCourses] = useState(null)
 

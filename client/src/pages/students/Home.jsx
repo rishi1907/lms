@@ -4,7 +4,7 @@ import Companies from '../../components/students/companies'
 import CoursesSection from '../../components/students/coursesSection'
 import TestimonialsSection from '../../components/students/TestimonialsSections'
 import Calltoaction from '../../components/students/calltoaction'
-import Footer from '../../components/students/footer'
+import Footer from '../../components/students/Footer'
 
 const Home = () => {
   return (

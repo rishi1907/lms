@@ -4,7 +4,7 @@ import Searchbar from '../../components/students/searchbar';
 import { useParams } from 'react-router-dom';
 import Coursecard from '../../components/students/coursecard';
 import { assets } from '../../assets/assets';
-import Footer from '../../components/students/footer';
+import Footer from '../../components/students/Footer';
 
 const CoursesList = () => {
   const { navigate, allCourses } = useContext(AppContext);
