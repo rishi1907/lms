@@ -1,21 +1,43 @@
-import React, { useEffect, useState } from 'react'
-import { dummyStudentEnrolled } from '../../assets/assets';
-import Loading from '../../components/students/loading';
+import React, { useContext, useEffect, useState } from 'react'
+import Loading from '../../components/students/loading'
+import { AppContext } from '../../context/Appcontext'
+import axios from 'axios'
+import { toast } from 'react-toastify'
 
 const Studentsenrolled = () => {
+  const { backendUrl, isEducator, getToken } = useContext(AppContext)
 
   const [enrolledStudents, setEnrolledStudents] = useState(null)
 
   const fetchEnrolledStudents = async () => {
-    setEnrolledStudents(dummyStudentEnrolled)
+    try {
+      const token = await getToken()
+      const { data } = await axios.get(
+        `${backendUrl}/api/educator/enrolled-students`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      if (data.success) {
+        // Ensure it's an array before reversing
+        setEnrolledStudents((data.enrolledStudents || []).reverse())
+      } else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error(error.message || "Something went wrong while fetching data.")
+    }
   }
 
   useEffect(() => {
-    fetchEnrolledStudents()
-  }, [])
+    if (isEducator) {
+      fetchEnrolledStudents()
+    }
+  }, [isEducator])
 
+  if (!enrolledStudents) return <Loading />
 
-  return enrolledStudents ? (
+  return (
     <div className='min-h-screen flex flex-row items-start justify-between md:p-8 md:pb-0 p-4 pt-8 pb-0'>
       <div className='flex flex-col items-center max-w-4xl w-full overflow-hidden rounded-md bg-white border border-gray-500/20'>
         <table className='md:table-auto table-fixed w-full overflow-hidden'>
@@ -33,15 +55,17 @@ const Studentsenrolled = () => {
                 <td className="px-4 py-3 text-center hidden sm:table-cell">{index + 1}</td>
                 <td className="md:px-4 px-2 py-3 flex items-center space-x-3">
                   <img
-                    src={item.student.imageUrl}
-                    alt=""
+                    src={item?.student?.imageUrl || '/default-avatar.png'}
+                    alt="Student"
                     className="w-9 h-9 rounded-full"
                   />
-                  <span className="truncate">{item.student.name}</span>
+                  <span className="truncate">{item?.student?.name || 'N/A'}</span>
                 </td>
-                <td className="px-4 py-3 truncate">{item.courseTitle}</td>
+                <td className="px-4 py-3 truncate">{item?.courseTitle || 'Untitled Course'}</td>
                 <td className="px-4 py-3 hidden sm:table-cell">
-                  {new Date(item.purchaseDate).toLocaleDateString()}
+                  {item?.purchaseDate
+                    ? new Date(item.purchaseDate).toLocaleDateString()
+                    : 'N/A'}
                 </td>
               </tr>
             ))}
@@ -49,7 +73,7 @@ const Studentsenrolled = () => {
         </table>
       </div>
     </div>
-  ) : <Loading />
+  )
 }
 
 export default Studentsenrolled

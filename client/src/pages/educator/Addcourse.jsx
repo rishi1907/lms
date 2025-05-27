@@ -1,9 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useContext } from 'react';
 import uniqid from 'uniqid';
 import Quill from 'quill';
+import axios from 'axios';
 import { assets } from '../../assets/assets';
+import { AppContext } from '../../context/Appcontext';
+import { toast } from 'react-toastify';
 
 const Addcourse = () => {
+  const { backendUrl, getToken } = useContext(AppContext);
   const quillRef = useRef(null);
   const editorRef = useRef(null);
 
@@ -71,7 +75,9 @@ const Addcourse = () => {
         if (chapter.chapterId === currentChapterId) {
           const newLecture = {
             ...lectureDetails,
-            lectureOrder: chapter.chapterContent.length > 0 ? chapter.chapterContent.slice(-1)[0].lectureOrder + 1 : 1,
+            lectureOrder: chapter.chapterContent.length > 0
+              ? chapter.chapterContent.slice(-1)[0].lectureOrder + 1
+              : 1,
             lectureId: uniqid()
           };
           return {
@@ -94,6 +100,51 @@ const Addcourse = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!image) {
+      toast.error('Thumbnail Not Selected');
+      return;
+    }
+
+    if (!quillRef.current || !quillRef.current.root) {
+      toast.error('Course Description is not initialized');
+      return;
+    }
+
+    try {
+      const courseData = {
+        courseTitle,
+        courseDescription: quillRef.current.root.innerHTML,
+        coursePrice: Number(coursePrice),
+        discount: Number(discount),
+        courseContent: chapters
+      };
+
+      const formData = new FormData();
+      formData.append('courseData', JSON.stringify(courseData));
+      formData.append('Image', image);
+
+      const token = await getToken();
+      const { data } = await axios.post(`${backendUrl}/api/educator/add-course`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (data.success) {
+        toast.success(data.message);
+        setCourseTitle('');
+        setCoursePrice(0);
+        setDiscount(0);
+        setImage(null);
+        setChapters([]);
+        quillRef.current.root.innerHTML = '';
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message || 'An error occurred');
+    }
   };
 
   useEffect(() => {
@@ -147,7 +198,7 @@ const Addcourse = () => {
                 accept="image/*"
                 hidden
               />
-              <img className='max-h-10' src={image ? URL.createObjectURL(image) : ''} alt="" />
+              {image && <img className='max-h-10' src={URL.createObjectURL(image)} alt="preview" />}
             </label>
           </div>
         </div>
@@ -186,7 +237,7 @@ const Addcourse = () => {
                     <div key={lecture.lectureId} className='flex justify-between items-center mb-2'>
                       <span>
                         {lectureIndex + 1} {lecture.lectureTitle} - {lecture.lectureDuration} mins -
-                        <a href={lecture.lectureUrl} target="_blank" className="text-blue-500 ml-1">Link</a> -
+                        <a href={lecture.lectureUrl} target="_blank" rel="noreferrer" className="text-blue-500 ml-1">Link</a> -
                         {lecture.isPreviewFree ? 'Free Preview' : 'Paid'}
                       </span>
                       <img src={assets.cross_icon} alt="" className='cursor-pointer'
@@ -203,7 +254,7 @@ const Addcourse = () => {
             className='flex justify-center items-center bg-blue-100 p-2 rounded-lg cursor-pointer'>+ Add chapter</div>
 
           {showPopup && (
-            <div className='fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50'>
+            <div className='fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50'>
               <div className='bg-white text-gray-700 p-4 rounded relative w-full max-w-80'>
                 <h2 className='text-lg font-semibold mb-4'>Add Lecture</h2>
 
