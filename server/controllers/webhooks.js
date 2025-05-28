@@ -56,69 +56,87 @@ export const clerkWebhook = async (req, res) => {
     }
 }
 
-const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY)
-
 export const stripeWebhook = async (req, res) => {
-    const sig = req.headers['stripe-signature'];
-
+  const sig = req.headers['stripe-signature'];
   let event;
 
   try {
     event = Stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
-  }
-  catch (err) {
-    res.status(400).send(`Webhook Error: ${err.message}`);
+  } catch (err) {
+    console.error("Webhook signature verification failed:", err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  // Handle the event
+  const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
+
   switch (event.type) {
-    case 'payment_intent.succeeded':{
-        const paymentIntent = event.data.object;
-        const paymentIntentId = paymentIntent.id;
+    case 'checkout.session.completed': {
+      const session = event.data.object;
+      const { purchaseId, userId, courseId } = session.metadata || {};
 
-        const session = await stripeInstance.checkout.sessions.list({
-            payment_intent: paymentIntentId
-        });
+      if (!purchaseId || !userId || !courseId) {
+        console.error("Missing metadata");
+        return res.status(400).send("Missing metadata");
+      }
 
-        const { purchaseId } = session.data[0].metadata;
+      try {
+        const [purchaseData, userData, courseData] = await Promise.all([
+          Purchase.findById(purchaseId),
+          User.findById(userId),
+          Course.findById(courseId)
+        ]);
 
-        const purchaseData = await Purchase.findById(purchaseId)
-        const userData = await User.findById(purchaseData.userId)
-        const courseData = await Course.findById(purchaseData.courseId.toString());
+        if (!purchaseData || !userData || !courseData) {
+          return res.status(404).send("Data not found");
+        }
 
-        courseData.enrolledStudents.push(userData)
-        await courseData.save();
+        if (!courseData.enrolledStudents.includes(userId)) {
+          courseData.enrolledStudents.push(userId);
+          await courseData.save();
+        }
 
-        userData.enrolledCourses.push(courseData._id)
-        await userData.save();
+        if (!userData.enrolledCourses.includes(courseId)) {
+          userData.enrolledCourses.push(courseId);
+          await userData.save();
+        }
 
         purchaseData.status = 'completed';
         await purchaseData.save();
 
+        console.log("Payment succeeded and enrollment updated.");
+      } catch (err) {
+        console.error("Error processing checkout.session.completed:", err);
+        return res.status(500).send("Internal Server Error");
+      }
+
       break;
     }
 
+    case 'payment_intent.payment_failed': {
+      const paymentIntent = event.data.object;
+      const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-    case 'payment_intent.payment_failed':{
-        const paymentIntent = event.data.object;
-        const paymentIntentId = paymentIntent.id;
+      const sessions = await stripeInstance.checkout.sessions.list({
+        payment_intent: paymentIntent.id,
+        limit: 1,
+      });
 
-        const session = await stripeInstance.checkout.sessions.list({
-            payment_intent: paymentIntentId
-        });
+      const session = sessions.data[0];
+      const { purchaseId } = session.metadata || {};
+      const purchaseData = await Purchase.findById(purchaseId);
 
-        const { purchaseId } = session.data[0].metadata;
-        const purchaseData = await Purchase.findById(purchaseId);
+      if (purchaseData) {
         purchaseData.status = 'failed';
         await purchaseData.save();
+      }
 
+      break;
+    }
 
-      break;}
-    // ... handle other event types
     default:
       console.log(`Unhandled event type ${event.type}`);
   }
 
-  // Return a response to acknowledge receipt of the event
-  res.json({received: true});
-}
+  res.json({ received: true });
+};
+
