@@ -1,72 +1,68 @@
 import { Webhook } from "svix";
-import User from "../models/User.js";
 import Stripe from "stripe";
-import { Purchase } from "../models/Purchase.js";
-import Course from "../models/Course.js";
 
-// Clerk Webhook (No changes needed)
-export const clerkWebhook = async (req, res) => {
-    try {
-        const Whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
-
-        await Whook.verify(JSON.stringify(req.body), {
-            "svix-id": req.headers["svix-id"],
-            "svix-timestamp": req.headers["svix-timestamp"],
-            "svix-signature": req.headers["svix-signature"]
-        });
-
-        const { data, type } = req.body;
-
-        switch (type) {
-            case 'user.created': {
-                const userData = {
-                    _id: data.id,
-                    email: data.email_addresses[0].email_address,
-                    name: data.first_name + " " + data.last_name,
-                    imageUrl: data.image_url,
-                };
-                await User.create(userData);
-                res.json({});
-                break;
-            }
-
-            case 'user.updated': {
-                const userData = {
-                    email: data.email_addresses[0].email_address,
-                    name: data.first_name + " " + data.last_name,
-                    imageUrl: data.image_url,
-                };
-                await User.findByIdAndUpdate(data.id, userData);
-                res.json({});
-                break;
-            }
-
-            case 'user.deleted': {
-                await User.findByIdAndDelete(data.id);
-                res.json({});
-                break;
-            }
-
-            default:
-                break;
-        }
-    } catch (error) {
-        res.json({ success: false, message: error.message });
-    }
-};
-
-import Stripe from "stripe";
-import { Purchase } from "../models/Purchase.js";
 import User from "../models/User.js";
+import { Purchase } from "../models/Purchase.js";
 import Course from "../models/Course.js";
 
 const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+// Clerk webhook handler
+export const clerkWebhook = async (req, res) => {
+  try {
+    const Whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
+
+    await Whook.verify(JSON.stringify(req.body), {
+      "svix-id": req.headers["svix-id"],
+      "svix-timestamp": req.headers["svix-timestamp"],
+      "svix-signature": req.headers["svix-signature"],
+    });
+
+    const { data, type } = req.body;
+
+    switch (type) {
+      case "user.created": {
+        const userData = {
+          _id: data.id,
+          email: data.email_addresses[0].email_address,
+          name: data.first_name + " " + data.last_name,
+          imageUrl: data.image_url,
+        };
+        await User.create(userData);
+        res.json({});
+        break;
+      }
+
+      case "user.updated": {
+        const userData = {
+          email: data.email_addresses[0].email_address,
+          name: data.first_name + " " + data.last_name,
+          imageUrl: data.image_url,
+        };
+        await User.findByIdAndUpdate(data.id, userData);
+        res.json({});
+        break;
+      }
+
+      case "user.deleted": {
+        await User.findByIdAndDelete(data.id);
+        res.json({});
+        break;
+      }
+
+      default:
+        res.json({});
+    }
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// Stripe webhook handler
 export const stripeWebhook = async (req, res) => {
   const sig = req.headers["stripe-signature"];
   let event;
 
-  // Step 1: Verify the webhook signature
   try {
     event = stripeInstance.webhooks.constructEvent(
       req.body,
@@ -78,14 +74,12 @@ export const stripeWebhook = async (req, res) => {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  // Step 2: Handle the event
   try {
     switch (event.type) {
       case "payment_intent.succeeded": {
         const paymentIntent = event.data.object;
         const paymentIntentId = paymentIntent.id;
 
-        // Get session using the paymentIntent ID
         const sessionList = await stripeInstance.checkout.sessions.list({
           payment_intent: paymentIntentId,
         });
@@ -96,7 +90,6 @@ export const stripeWebhook = async (req, res) => {
 
         const { purchaseId } = sessionList.data[0].metadata;
 
-        // Find purchase, user, and course
         const purchaseData = await Purchase.findById(purchaseId);
         if (!purchaseData) return res.status(404).send("Purchase not found");
 
@@ -106,7 +99,6 @@ export const stripeWebhook = async (req, res) => {
         const courseData = await Course.findById(purchaseData.courseId.toString());
         if (!courseData) return res.status(404).send("Course not found");
 
-        // Update enrollments
         if (!courseData.enrolledStudents.includes(userData._id)) {
           courseData.enrolledStudents.push(userData._id);
           await courseData.save();
@@ -117,7 +109,6 @@ export const stripeWebhook = async (req, res) => {
           await userData.save();
         }
 
-        // Update purchase status
         purchaseData.status = "completed";
         await purchaseData.save();
 
