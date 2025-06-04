@@ -22,7 +22,7 @@ await connectCloudinary();
 app.use(cors());
 
 // ✅ Stripe Webhook route — must come BEFORE any express.json() or Clerk middleware
-app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), stripeWebhook);
+app.post('/api/stripe', express.raw({ type: 'application/json' }), stripeWebhook);
 
 // Clerk Middleware (uses express.json internally — placed after raw body route)
 app.use(clerkMiddleware());

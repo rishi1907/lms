@@ -21,47 +21,97 @@ const Coursedetail = () => {
     , calculateNoOfLectures, currency, backendUrl, userData, getToken } = useContext(AppContext)
 
   const fetchCourseData = async () => {
-    
     try {
-      const { data } = await axios.get(backendUrl + '/api/course/' + id)
+      console.log('Fetching course with ID:', id);
+      const { data } = await axios.get(backendUrl + "/api/course/" + id);
 
       if (data.success) {
-        setCourseData(data.courseData)
+        console.log('Course data received:', data.courseData);
+        setCourseData(data.courseData);
       } else {
-        toast.error(data.message)
+        toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.message)
+      console.error('Error fetching course:', error);
+      toast.error(error.message);
     }
-  }
-
+  };
 
   const enrollCourse = async () => {
     try {
+      console.log("Enrollment attempt - Course ID:", id);
+      console.log("Course Data:", courseData);
+      console.log("User Data:", userData);
+
       if (!userData) {
-        return toast.warn('Login to Enroll')
+        return toast.warn("Login to Enroll");
       }
       if (isAlreadyEnrolled) {
-        return toast.warn('Already enrolled')
+        return toast.warn("Already enrolled");
       }
-      const token = await getToken()
+      if (!courseData || !courseData._id) {
+        console.error("Course data missing or invalid:", courseData);
+        return toast.error(
+          "Course data not available. Please refresh the page and try again."
+        );
+      }
+      if (!id) {
+        console.error("Course ID from URL is missing");
+        return toast.error(
+          "Course ID not found. Please refresh the page and try again."
+        );
+      }
+      const token = await getToken();
+      if (!token) {
+        console.error("Authentication token missing");
+        return toast.error(
+          "Authentication failed. Please try logging in again."
+        );
+      }
 
-      const { data } = await axios.post(backendUrl + '/api/user/purchase', {courseId: courseData._id}, {
-        headers: {
-          Authorization: `Bearer ${token}`
+      console.log("Sending purchase request with courseId:", courseData._id);
+      const { data } = await axios.post(
+        backendUrl + "/api/user/purchase",
+        { courseId: courseData._id },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      })
+      );
       if (data.success) {
-        const { session_url } = data
-        window.location.replace(session_url)
-      }
-      else {
-        toast.error(data.message)
+        const { session_url } = data;
+        if (!session_url) {
+          console.error("No session URL in response:", data);
+          return toast.error("Failed to create payment session");
+        }
+        window.location.replace(session_url);
+      } else {
+        console.error("Purchase failed:", data.message);
+        toast.error(data.message || "Failed to process enrollment");
       }
     } catch (error) {
-      toast.error(error.message)
+      console.error("Enrollment error details:", {
+        error: error,
+        response: error.response?.data,
+        courseId: courseData?._id,
+        urlId: id,
+      });
+      
+      // Handle specific error cases
+      if (error.response?.data?.message === "Already enrolled in this course") {
+        setIsAlreadyEnrolled(true);
+        return toast.warn("You are already enrolled in this course");
+      }
+      
+      toast.error(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to enroll in course"
+      );
     }
-  }
+  };
+
 
 
   useEffect(() => {
