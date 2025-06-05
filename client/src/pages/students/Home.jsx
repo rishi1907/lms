@@ -1,9 +1,9 @@
 import React from 'react'
-import Hero from '../../components/students/hero'
-import Companies from '../../components/students/companies'
-import CoursesSection from '../../components/students/coursesSection'
+import Hero from '../../components/students/Hero'
+import Companies from '../../components/students/Companies'
+import CoursesSection from '../../components/students/CoursesSection'
 import TestimonialsSection from '../../components/students/TestimonialsSections'
-import Calltoaction from '../../components/students/calltoaction'
+import Calltoaction from '../../components/students/Calltoaction'
 import Footer from '../../components/students/Footer'
 
 const Home = () => {

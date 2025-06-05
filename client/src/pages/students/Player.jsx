@@ -5,7 +5,7 @@ import { assets } from '../../assets/assets';
 import humanizeDuration from 'humanize-duration';
 import YouTube from 'react-youtube';
 import Footer from '../../components/students/Footer';
-import Rating from '../../components/students/rating';
+import Rating from '../../components/students/Rating';
 import { toast } from 'react-toastify';
 import Loading from '../../components/students/Loaading';
 import axios from 'axios'; 

@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { AppContext } from '../../context/Appcontext';
-import Searchbar from '../../components/students/searchbar';
+import Searchbar from '../../components/students/Searchbar';
 import { useParams } from 'react-router-dom';
-import Coursecard from '../../components/students/coursecard';
+import Coursecard from '../../components/students/Coursecard';
 import { assets } from '../../assets/assets';
 import Footer from '../../components/students/Footer';
 
