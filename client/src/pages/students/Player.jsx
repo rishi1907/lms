@@ -7,7 +7,7 @@ import YouTube from 'react-youtube';
 import Footer from '../../components/students/Footer';
 import Rating from '../../components/students/rating';
 import { toast } from 'react-toastify';
-import Loading from '../../components/students/loading';
+import Loading from '../../components/students/Loaading';
 import axios from 'axios'; 
 
 const Player = () => {

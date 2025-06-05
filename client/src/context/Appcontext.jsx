@@ -127,15 +127,9 @@ export const AppContextProvider = (props) => {
         fetchAllCourses()
     }, []);
 
-    const logtoken = async () => {
-        const token = await getToken();
-        console.log(token);
-    }
-
 
     useEffect(() => {
         if (user) {
-            logtoken();
             fetchUserData();
             fetchUserEnrolledCourses()
         }

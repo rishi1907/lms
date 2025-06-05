@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { AppContext } from '../../context/Appcontext'
 import { assets, dummyDashboardData } from '../../assets/assets'
-import Loading from '../../components/students/loading'
+import Loading from '../../components/students/Loaading'
 import { toast } from 'react-toastify'
 import axios from 'axios'
 

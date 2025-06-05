@@ -5,7 +5,7 @@ import CourseList from './pages/students/CoursesList';
 import Coursedetail from './pages/students/Coursedetail';
 import Myenrollments from './pages/students/Myenrollments';
 import Player from './pages/students/Player';
-import Loading from './components/students/loading';
+import Loading from './components/students/Loaading';
 import Educator from './pages/educator/educator';
 import Dashboard from './pages/educator/dashboard';
 import Addcourse from './pages/educator/Addcourse';
