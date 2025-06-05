@@ -97,7 +97,7 @@ const Player = () => {
     try {
       const token = await getToken();
       const { data } = await axios.post(
-        backendUrl + '/api/user/add-rating',
+        backendUrl + '/api/user/add-ratings',
         { courseId, rating },
         {
           headers: {
