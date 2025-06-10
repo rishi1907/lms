@@ -6,7 +6,6 @@ import { toast } from 'react-toastify'
 import axios from 'axios'
 
 const Myenrollments = () => {
-
   const {
     enrolledCourses,
     calculateCourseDuration,
@@ -35,7 +34,9 @@ const Myenrollments = () => {
             }
           );
           let totalLectures = calculateNoOfLectures(course);
-          const lectureCompleted = data.progressData ? data.progressData.lectureCompleted.length : 0;
+          const lectureCompleted = data.progressData
+            ? data.progressData.lectureCompleted.length
+            : 0;
           return { totalLectures, lectureCompleted }
         })
       );
@@ -60,12 +61,12 @@ const Myenrollments = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <div className="flex-grow md:px-36 px-8 pt-10">
-        <h1 className='text-2xl font-semibold'>My Enrollments</h1>
+        <h1 className="text-2xl font-semibold mb-2">My Enrollments</h1>
 
         {enrolledCourses.length === 0 ? (
           <p className="text-gray-600 mt-10">You haven't enrolled in any courses yet.</p>
         ) : (
-          <table className='md:table-auto table-fixed w-full overflow-hidden border mt-10'>
+          <table className='md:table-auto table-fixed w-full overflow-hidden border mt-4'>
             <thead className='text-gray-900 border-b border-gray-500/20 text-sm text-left max-sm:hidden'>
               <tr>
                 <th className='px-4 py-3 font-semibold truncate'>Course</th>
@@ -85,7 +86,8 @@ const Myenrollments = () => {
                         strokeWidth={2}
                         percent={
                           progressArray[index]
-                            ? (progressArray[index].lectureCompleted * 100) / progressArray[index].totalLectures
+                            ? (progressArray[index].lectureCompleted * 100) /
+                              progressArray[index].totalLectures
                             : 0
                         }
                         className='bg-gray-300 rounded-full'
@@ -105,7 +107,7 @@ const Myenrollments = () => {
                       onClick={() => navigate('/player/' + course._id)}
                     >
                       {progressArray[index] &&
-                        progressArray[index].lectureCompleted / progressArray[index].totalLectures === 1
+                        progressArray[index].lectureCompleted / progressArray[index].totalLectures >= 1
                         ? 'Completed'
                         : 'On going'}
                     </button>
