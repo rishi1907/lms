@@ -188,7 +188,7 @@ const Player = () => {
               <div className='flex justify-between items-center mt-1'>
                 <p>{playerData.chapter}.{playerData.lecture} {playerData.lectureTitle}</p>
                 <button onClick={() => markLectureAsCompleted(playerData.lectureId)} className='text-blue-600'>
-                  {progressData?.lectureCompleted?.includes(playerData.lectureId) ? 'Complete' : 'Mark Complete'}
+                  {progressData?.lectureCompleted?.includes(playerData.lectureId) ? 'Completed' : 'Mark Complete'}
                 </button>
               </div>
             </div>
