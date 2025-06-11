@@ -103,25 +103,33 @@ export const dummyEducatorData = {
 
 export const dummyTestimonial = [
     {
-        name: 'Donald Jackman',
-        role: 'SWE 1 @ Amazon',
+        name: 'Ethan Sullivan',
+        role: 'Senior Software Engineer @ Meta',
         image: assets.profile_img_1,
         rating: 5,
-        feedback: 'I\'ve been using Imagify for nearly two years, primarily for Instagram, and it has been incredibly user-friendly, making my work much easier.',
+        feedback: 'The learning experience was top-notch. The depth and clarity of the content really helped me improve my system design skills.',
     },
     {
-        name: 'Richard Nelson',
-        role: 'SWE 2 @ Samsung',
+        name: 'Liam Carter',
+        role: 'Staff Engineer @ Netflix',
         image: assets.profile_img_2,
         rating: 4,
-        feedback: 'I\'ve been using Imagify for nearly two years, primarily for Instagram, and it has been incredibly user-friendly, making my work much easier.',
+        feedback: 'Great platform for serious learners. The hands-on approach and real-world projects truly accelerated my learning.',
     },
     {
-        name: 'James Washington',
-        role: 'SWE 2 @ Google',
+        name: 'Sophia Carter',
+        role: 'SDE II @ Google',
+        image: assets.profile_img3,
+        rating: 5,
+        feedback: 'This platform made it incredibly easy to sharpen my skills while managing a busy work schedule. The content is clear, modern, and highly practical.',
+    }
+    ,
+    {
+        name: 'Noah Bennett',
+        role: 'Tech Lead @ Stripe',
         image: assets.profile_img_3,
-        rating: 4.5,
-        feedback: 'I\'ve been using Imagify for nearly two years, primarily for Instagram, and it has been incredibly user-friendly, making my work much easier.',
+        rating: 5,
+        feedback: 'From beginner to advanced topics, everything is covered in a structured way. It’s a must-have resource for any developer.',
     },
 ];
 

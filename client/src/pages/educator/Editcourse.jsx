@@ -22,6 +22,7 @@ const Editcourse = () => {
 
   const [showPopup, setShowPopup] = useState(false);
   const [currentChapterId, setCurrentChapterId] = useState(null);
+  const [editLectureIndex, setEditLectureIndex] = useState(null);
   const [lectureDetails, setLectureDetails] = useState({
     lectureTitle: '',
     lectureDuration: '',
@@ -92,6 +93,13 @@ const Editcourse = () => {
   const handleLecture = (action, chapterId, lectureIndex) => {
     if (action === 'add') {
       setCurrentChapterId(chapterId);
+      setEditLectureIndex(null);
+      setLectureDetails({
+        lectureTitle: '',
+        lectureDuration: '',
+        lectureUrl: '',
+        isPreviewFree: false,
+      });
       setShowPopup(true);
     } else if (action === 'remove') {
       setChapters(prev =>
@@ -101,29 +109,48 @@ const Editcourse = () => {
             : c
         )
       );
+    } else if (action === 'edit') {
+      const chapter = chapters.find(c => c.chapterId === chapterId);
+      const lecture = chapter.chapterContent[lectureIndex];
+      setCurrentChapterId(chapterId);
+      setEditLectureIndex(lectureIndex);
+      setLectureDetails({ ...lecture });
+      setShowPopup(true);
     }
   };
 
-  const addLecture = () => {
+  const saveLecture = () => {
     setChapters(prev =>
       prev.map(c => {
         if (c.chapterId === currentChapterId) {
-          const newLecture = {
-            ...lectureDetails,
-            lectureOrder: c.chapterContent.length > 0
-              ? c.chapterContent.slice(-1)[0].lectureOrder + 1
-              : 1,
-            lectureId: uniqid(),
-          };
-          return {
-            ...c,
-            chapterContent: [...c.chapterContent, newLecture]
-          };
+          if (editLectureIndex !== null) {
+            const updatedLectures = [...c.chapterContent];
+            updatedLectures[editLectureIndex] = {
+              ...lectureDetails,
+              lectureId: updatedLectures[editLectureIndex].lectureId,
+              lectureOrder: updatedLectures[editLectureIndex].lectureOrder,
+            };
+            return { ...c, chapterContent: updatedLectures };
+          } else {
+            const newLecture = {
+              ...lectureDetails,
+              lectureOrder: c.chapterContent.length > 0
+                ? c.chapterContent.slice(-1)[0].lectureOrder + 1
+                : 1,
+              lectureId: uniqid(),
+            };
+            return {
+              ...c,
+              chapterContent: [...c.chapterContent, newLecture]
+            };
+          }
         }
         return c;
       })
     );
+
     setShowPopup(false);
+    setEditLectureIndex(null);
     setLectureDetails({
       lectureTitle: '',
       lectureDuration: '',
@@ -233,7 +260,22 @@ const Editcourse = () => {
                   {chapter.chapterContent.map((lecture, lIndex) => (
                     <li key={lecture.lectureId} className="flex justify-between items-center py-1">
                       <span>{lecture.lectureTitle} ({lecture.lectureDuration})</span>
-                      <button type="button" onClick={() => handleLecture('remove', chapter.chapterId, lIndex)}>Remove</button>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          className="text-blue-600 hover:underline"
+                          onClick={() => handleLecture('edit', chapter.chapterId, lIndex)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          className="text-red-600 hover:underline"
+                          onClick={() => handleLecture('remove', chapter.chapterId, lIndex)}
+                        >
+                          Remove
+                        </button>
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -248,7 +290,7 @@ const Editcourse = () => {
       {showPopup && (
         <div className="fixed top-0 left-0 w-full h-full bg-black/50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded w-[90%] max-w-md">
-            <h3 className="text-lg font-bold mb-4">Add Lecture</h3>
+            <h3 className="text-lg font-bold mb-4">{editLectureIndex !== null ? 'Edit Lecture' : 'Add Lecture'}</h3>
             <input
               type="text"
               placeholder="Lecture Title"
@@ -280,7 +322,9 @@ const Editcourse = () => {
             </label>
             <div className="flex justify-between">
               <button type="button" onClick={() => setShowPopup(false)} className="px-4 py-2 bg-gray-300 rounded">Cancel</button>
-              <button type="button" onClick={addLecture} className="px-4 py-2 bg-blue-600 text-white rounded">Add</button>
+              <button type="button" onClick={saveLecture} className="px-4 py-2 bg-blue-600 text-white rounded">
+                {editLectureIndex !== null ? 'Update' : 'Add'}
+              </button>
             </div>
           </div>
         </div>

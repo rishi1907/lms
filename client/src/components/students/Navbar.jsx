@@ -17,32 +17,36 @@ const Navbar = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const becomeEducator = async () => {
-    try {
-      if (isEducator) {
-        navigate('/educator');
-        setDrawerOpen(false);
-        return;
-      }
-
-      const token = await getToken();
-      const { data } = await axios.get(`${backendUrl}/api/educator/update-role`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (data.success) {
-        setIsEducator(true);
-        toast.success(data.message);
-      } else {
-        toast.error(data.message);
-      }
-
+  try {
+    if (isEducator) {
+      navigate('/educator');
       setDrawerOpen(false);
-    } catch (error) {
-      toast.error(error.message);
+      return;
     }
-  };
+
+    const confirmed = window.confirm('Do you want to become an Educator? You will be able to publish courses.');
+    if (!confirmed) return;
+
+    const token = await getToken();
+    const { data } = await axios.get(`${backendUrl}/api/educator/update-role`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (data.success) {
+      setIsEducator(true);
+      toast.success('Congratulations! You are now an educator. You can publish courses now.');
+    } else {
+      toast.error(data.message);
+    }
+
+    setDrawerOpen(false);
+  } catch (error) {
+    toast.error(error.message);
+  }
+};
+
 
   // Close drawer on ESC key
   useEffect(() => {
